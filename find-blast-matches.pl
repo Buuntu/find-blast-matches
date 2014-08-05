@@ -1,19 +1,120 @@
 #!/usr/bin/env perl
-#-----------------------------------------------------------------------------------#
-# This script takes a BLAST output file and a FASTA file as arguments, given after  #
-# the '-blast' and '-fasta' options respectively.                                   #
-# Example: find-blast-matches -blast BLAST_FILE -fasta FASTA_FILE                   #
-#                                                                                   #
-# It parses through the BLAST file to check for high quality matches, which are     #
-# then searched for in the FASTA file.  The sequence from the FASTA file is         #
-# displayed to STDOUT.  Optional arguments can be used, such as if you wish to      #
-# extract                                                                           #
-# the 3' or 5' regions of the sequence.                                             #
-# Try 'find-blast-matches --help' for a complete listing of all arguments           #
-#                                                                                   #
-# Author: Gabriel Abud (gabriel.jabud@gmail.com), last edited 7/11/14               #
-#-----------------------------------------------------------------------------------#
 use strict;
+use warnings;
+
+=head1 NAME
+
+find-blast-matches.pl - extract DNA sequences based on BLAST hits
+
+=head1 SYNOPSIS
+
+find-blast-matches.pl [-h -e -p -5 -n -o -3 -header] -blast <BLAST_FILE> -fasta <FASTA_FILE>
+
+=head1 OPTIONS
+
+=head2 Mandatory:
+
+=over
+
+=item B<-blast>
+
+BLAST output file to read from. The alignment should use the file specified by
+'-fasta' option ideally
+
+=item B<-fasta>
+
+FASTA file to read from. This is where the sequence will be extracted from
+
+=back
+
+=head2 Optional:
+
+=over
+
+=item B<-h>
+
+Displays this help message
+
+=item B<-e>
+
+Maximum e-value for matches (0.01 by default)
+
+=item B<-p>
+
+Number of base pairs of 5' region to be included with the sequence
+
+=item B<-5>
+
+Number of base pairs of 5' region only, excluding the regular sequence
+
+=item B<-3>
+
+Number of base pairs of 3' region only, excluding the regular sequence
+
+=item B<-n>
+
+Number of top hits to display, starting with the best hit
+
+=item B<-o>
+
+Exact match to display (this option can't be used in conjunction with '-n')
+
+=item B<-header>
+
+The FASTA header to display instead of the default
+
+=back
+
+=head1 DESCRIPTION
+
+This script takes a BLAST output file and a FASTA file as arguments, 
+given after the -blast and -fasta options respectively. The BLAST output 
+file should have been generated with your sequence of interest and the 
+FASTA file supplied as an argument.
+Example: find-blast-matches.pl -blast BLAST_FILE -fasta FASTA_FILE
+
+It parses through the BLAST file to check for high quality matches 
+which are then searched for in the FASTA file.  The sequence may vary 
+from you candidate sequence, hence the BLAST search prior. 
+
+The sequence from the FASTA file is then displayed to STDOUT.
+Optional arguments can be used, such as to extract the 5' or 3' region.
+
+=head1 AUTHOR
+
+Gabriel Abud - E<lt>gabriel.jabud-at-gmail.comE<gt>
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this and other
+Bioperl modules.  Send your comments and suggestion preferably to
+the Bioperl mailing list.  Your participation is much appreciated
+
+  bioperl-l@bioperl.org                  - General discussion
+  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+of the bugs and their resolution. Bug reports can be submitted via 
+email or the web:
+
+  https://github.com/bioperl/bioperl-live/issues
+
+=head1 EDIT HISTORY
+
+2014-08-04 - Gabriel Abud
+    First features added
+
+=head1 DEPENDANCIES
+
+Getopt::long, Pod::Usage, Bio::SearchIO, Bio::Seq, Bio::SeqIO, Bio::Perl,
+File::Basename
+
+=cut
+
 
 # Modules
 use Bio::SearchIO qw(new);
@@ -22,6 +123,7 @@ use Bio::SeqIO qw(new);
 use Bio::Perl qw(revcom_as_string);
 use File::Basename qw(basename);
 use Getopt::Long qw(GetOptions);
+use Pod::Usage;
 
 # Variables
 my $baseProg = basename($0);    # Program name
@@ -94,20 +196,26 @@ GetOptions(
     'o=i'      => \$exact_match,
     '5=i'      => \$promoter_only,
     '3=i'      => \$three_prime,
-    'help'     => \$opt_help,
-    'header=s' => \$header,
-    'blast=s'  => \$blastFile,
-    'fasta=s'  => \$inputFile
-) or syntax();
+    'help|h'     => \$opt_help,
+    'header|head=s' => \$header,
+    'blast|b=s'  => \$blastFile,
+    'fasta|f=s'  => \$inputFile
+) or pod2usage(-exitstatus => 0, -verbose => 1);
 
 # Help screen
-help() if defined $opt_help;
+pod2usage(-exitstatus => 0, -verbose => 2) if $opt_help;
+#help() if defined $opt_help;
 
 # Checks for required arguments
-syntax() if ( !defined $blastFile || !defined $inputFile );
+pod2usage(-exitstatus => 0, -verbose => 1, 
+          -msg => "You must specify the FASTA and BLAST files to read from!\n")
+    if (!defined $blastFile || !defined $inputFile);
+#syntax() if ( !defined $blastFile || !defined $inputFile );
 
 # Checks for any negative numbers
-syntax()
+#syntax()
+pod2usage(-exitstatus => 0, -verbose => 1,
+          -msg => "You must use positive numbers as values to options!")
   if ( $e_value < 0
     || $promoter < 0
     || $matches < 0
@@ -375,3 +483,5 @@ for my $m ( 0 .. $#scaffolds )
 
     close INFILE;
 }    # End of major for loop
+
+__END__
