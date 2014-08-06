@@ -158,36 +158,6 @@ my $promoter_only;  # Undef by default
 my $opt_help;       # Undef by default
 my $header;         # Undef by default
 
-# Functions for proper command line usage
-sub syntax {
-    print STDERR
-      "Usage: $baseProg -blast 'BLAST_file' -fasta 'FASTA_file' [OPTIONS]\n";
-    print STDERR "Try '$baseProg --help' for more information.\n";
-    exit;
-}
-
-sub help {
-    print STDERR
-      "\nNAME:\n",
-      "\t$baseProg - extract a DNA sequence based on BLAST hits\n\n",
-      "SYNTAX:\n",
-      "\t$baseProg -blast 'BLAST_file' -fasta 'FASTA__file'  [OPTIONS]\n\n",
-      "OPTIONS:\n",
-      "\t(All options require an additional number argument [ie: -e 0.01])\n\n",
-      "\t-e, maximum e-value for matches (0.01 by default)\n\n",
-      "\t-p, number of base pairs of 5' region to be included with the\n",
-      "\t sequence of interest\n\n",
-      "\t-5, number of base pairs of 5' region, excluding the sequence\n",
-      "\t of interest (unlike '-p')\n\n",
-      "\t-n, number of top hits to display, starting with the highest hit\n",
-      "\t(1 by default)\n\n",
-      "\t-o, exact match to display (this option can't be used in conjuction\n",
-      "\t with '-n')\n\n",
-      "\t-3, number of base pairs of 3' region to display\n\n",
-      "\t-header, the fasta header to display instead of the default\n\n";
-    exit;
-}
-
 # Get command line options
 GetOptions(
     'e=f'      => \$e_value,
